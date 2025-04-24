@@ -5,8 +5,8 @@ import {BrowserRouter as Router,
 }
 from 'react-router-dom';
 import {Provider as MapProvider} from '../src/context/MapSliceContext';
-import LoginPage from './pages/LoginPage';
-import MapPage from './pages/MapPage';
+import LoginPage from './pages/LoginPage/LoginPage';
+import MapPage from './pages/MapPage/MapPage';
 function App() {
 
   return (
