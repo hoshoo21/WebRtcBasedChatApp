@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import "./LoginPage.css";
 import Login from "../../component/Login";
 import { useNavigate } from "react-router-dom";
-
+import {Context as AuthContext} from '../../context/AuthContext';
 const LoginPage =(props)=>{
         const navigate = useNavigate();
-        const [location, setLocation]= useState(null);
+        const {state, setUserLocation } = useContext(AuthContext);
         const hanldeLogin = ()=>{
                 navigate("/Map")
         }
-
         useEffect(()=>{
                 navigator.geolocation.getCurrentPosition(
                         (position)=>{
                                 const { latitude, longitude } = position.coords;
                                 console.log(longitude, latitude);
-                                setLocation({ latitude, longitude });             
+                                setUserLocation({ latitude, longitude });             
                         },
                         (error)=>{
                           console.log(error);
-                        }
+                          setUserLocation(null);
+                         }
                         )
                 
         },[]);
@@ -28,7 +28,9 @@ const LoginPage =(props)=>{
                    <div className="l_page_box">
                     <Login logoClass = "logo"
                            loginInputClass ="l_page_input" 
-                           loginButtonClass ="l_page_login_button" clickHandle = {hanldeLogin} />      
+                           loginButtonClass ="l_page_login_button" 
+                           clickHandle = {hanldeLogin}
+                           />      
                    </div>
             </div>
         );

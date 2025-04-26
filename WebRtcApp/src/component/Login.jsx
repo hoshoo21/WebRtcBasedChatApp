@@ -1,18 +1,20 @@
-import React, {useState} from "react";
+import React, {useContext} from "react";
+import {Context as AuthContext} from '../context/AuthContext';
 
 const Login =(props) =>{
-    const [userName, setUserName] = useState('');
+
+    const {state, setName} = useContext(AuthContext); 
     const handleValueChange = (e)=>{
-            setUserName (e.target.value);
+        setName (e.target.value);
     }
     const isValidUsrName =() =>{
-        console.log(userName);
-        return userName.length > 0 && userName.length < 15 && !userName.includes(' ');
+        console.log('is valid user');
+        return state.name.length > 0 && state.name.length < 15 && !state.name.includes(' ') && state.userLocation !=null;
     }
     return <>
         <p className={props.logoClass}> ChatApp </p>
         <input className ={props.loginInputClass} 
-                value = {userName} 
+                value = {state.name} 
                 onChange={handleValueChange}
         />
         <button disabled={!isValidUsrName()} className={props.loginButtonClass} onClick={props.clickHandle} > 
