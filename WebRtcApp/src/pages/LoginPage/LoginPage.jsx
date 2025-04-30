@@ -3,26 +3,47 @@ import "./LoginPage.css";
 import Login from "../../component/Login";
 import { useNavigate } from "react-router-dom";
 import {Context as AuthContext} from '../../context/AuthContext';
+import { getFakeLocation } from "./TEMPORARY_LOCATIONS";
+import { connectToSocketServer, proceedWithLogin } from "../../connection/SocketConnection";
 const LoginPage =(props)=>{
         const navigate = useNavigate();
         const {state, setUserLocation } = useContext(AuthContext);
         const hanldeLogin = ()=>{
+                let dataobj = {
+                        username : state.name,
+                        coords : {
+                               latitude:state.userLocation.position.latitude,
+                               longitude:state.userLocation.position.longitude
+                   
+                       }
+                };
+                console.log(dataobj);
+                 proceedWithLogin(dataobj);
                 navigate("/Map")
         }
         useEffect(()=>{
-                navigator.geolocation.getCurrentPosition(
-                        (position)=>{
-                                const { latitude, longitude } = position.coords;
-                                console.log(longitude, latitude);
-                                setUserLocation({ latitude, longitude });             
-                        },
-                        (error)=>{
-                          console.log(error);
-                          setUserLocation(null);
-                         }
-                        )
+                setUserLocation(getFakeLocation());
+                // navigator.geolocation.getCurrentPosition(
+                //         (position)=>{
+                //                 const { latitude, longitude } = position.coords;
+                //                 console.log(longitude, latitude);
+                //                 setUserLocation({ latitude, longitude });             
+                //         },
+                //         (error)=>{
+                //           console.log(error);
+                //           setUserLocation(null);
+                //          }
+                //         )
                 
         },[]);
+        console.log(state.userLocation);
+        useEffect(()=>{
+                
+                if (state.userLocation){
+                        connectToSocketServer();
+                }
+                        
+        },[state.userLocation])
         return(
             <div className="l_page_main_container">
                    <div className="l_page_box">

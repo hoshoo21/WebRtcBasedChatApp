@@ -34,6 +34,7 @@ const isValidUser=(dispatch)=>{
 
 const setUserLocation =(dispatch)=>{
     return (userLocation)=>{
+        console.log(userLocation);
         dispatch({type :"Set_User_Location", payload:userLocation});
     }    
 }
