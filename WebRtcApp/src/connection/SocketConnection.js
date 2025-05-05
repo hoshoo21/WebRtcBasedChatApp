@@ -10,10 +10,10 @@ export const connectToSocketServer = ()=>{
             console.log("Socket client connected");
         });
        
-        socketClient.on("disconnect", () => {
-            console.log("Socket client disconnected");
-        });
-    }
+            socketClient.on("disconnect", () => {
+                console.log("Socket client disconnected");
+            });
+        }
 
     return socketClient;
 }
@@ -25,7 +25,7 @@ export const proceedWithLogin =(data)=>{
 
 export const getSocketClient = () => {
     if (!socketClient) {
-        throw new Error("Socket client is not initialized. Call connectToSocketServer() first.");
+        socketClient = connectToSocketServer();       
     }
     return socketClient;
 };

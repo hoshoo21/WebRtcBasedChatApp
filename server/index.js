@@ -46,6 +46,8 @@ server.listen(PORT, ()=>{
 const disconnectEventHandler =(id)=>{
     console.log(`socket disconnect with id  ${id}`);
     removeUser(id);
+    broadcastDisconnectedUser(id);
+
 };
 
 const removeUser=(id)=>{
@@ -59,6 +61,9 @@ const loginHandler = (socket, data)=> {
         username :data.username,
         coords : data.coords
     };
+   
+   
+    console.log("emtting online-users event")
     console.log(data);
     io.to("logged-users").emit("online-users", convertOnlineUsersToArray() );
 }
@@ -70,4 +75,9 @@ const convertOnlineUsersToArray =()=>{
     });
     console.log(onLineUsers);
     return onLineUsers;
+}
+
+
+const broadcastDisconnectedUser = (socketid)=>{
+    io.to("logged-users").emit("user-disconnected", socketid);
 }

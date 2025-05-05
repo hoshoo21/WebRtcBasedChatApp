@@ -14,8 +14,8 @@ const fake_locations =[
     },
     {
         position: {
-            latitude: -58.67656, 
-            longitude: 56.70621,
+            latitude: -58.67656 , 
+            longitude:56.70621
         },
     },
     {
