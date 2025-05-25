@@ -10,7 +10,7 @@ const mapReducer = (state,action)=>{
             console.log('online user payload' + action.payload);
             return {...state, onLineusers : action.payload};    
         case "set_selected_points":
-            return {...state , selectedPoints : [...state.selectedPoints, action.payload]};
+            return {...state ,selectedPoints : action.payload};
         case "remove_user" :
             const userArray = state.onLineusers.filter((user) => user.id !== action.payload );
             return {...state, onLineusers : userArray    };   

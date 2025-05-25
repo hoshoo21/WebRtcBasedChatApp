@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef } from "react";
-import  { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import  { MapContainer, TileLayer, Marker, Popup,   Polyline, useMap } from 'react-leaflet';
 import {Context as MapContext} from '../../context/MapSliceContext';
 import {getSocketClient} from '../../connection/SocketConnection';
 import useSocketEvents from "../../hooks/useSocketEvents";
@@ -8,22 +8,29 @@ import { getDistanceInKm } from "../../helper/locationHelper";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import  './MapPage.css';
+import ActionButton from "../../component/ActionButton";
+import Messenger from "../../component/Messenger";
 
 
+  
 function FitBounds({ locations }) {
   const map = useMap();
+  let points= [];
+  for (let loc in locations){
+    points.push([locations[loc].data.latitude, locations[loc].data.longitude]);
+  }  
   useEffect(() => {
     if (locations.length > 0) {
-      const bounds = L.latLngBounds(locations);
+      const bounds = L.latLngBounds(points);
       map.fitBounds(bounds, { padding: [50, 50] });
     }
-  }, [locations, map]);
+  }, [points, map]);
   return null;
 }
 
 const FitToLine = ({ points }) => {
   const map = useMap();
- 
+  
   useEffect(() => {
     const bounds = L.latLngBounds(points);
     map.fitBounds(bounds, { padding: [20, 20] });
@@ -43,12 +50,12 @@ const MapPage =(props)=>{
   
    const {state, setOnlineUsers, setSelectedPoints,removeUser} = useContext(MapContext);
     const mylocation = state.onLineusers.find ((user)=> user.myself=== true);
-    const otherUsers =  state.onLineusers.filter ((user)=> user.myself === undefined);
-    const myPos = [mylocation.data.latitude, mylocation.data.longitude];
-    const otherPositions = otherUsers
-      .filter(user => user.data?.latitude && user.data?.longitude)
-      .map(user => [user.data.latitude, user.data.longitude]);
-    const allPositions = [myPos, ...otherPositions];
+    
+    const otherPositions = state.onLineusers.filter ((user)=> user.myself=== undefined);
+    
+    
+    const allPositions = [...otherPositions, mylocation];
+  
     const icon = L.icon({
       iconSize: [25, 41],
       iconAnchor: [10, 41],
@@ -61,13 +68,19 @@ const MapPage =(props)=>{
        const handlePopupClick =(e)=>{
         console.log("clicked target", e.target);
         console.log(e.target.dataset.id);
-        const pos = otherUsers.find ((position)=> position.id === e.target.dataset.id);
+        const pos = allPositions.find ((position)=> position.id === e.target.dataset.id);
         if (state.selectedPoints.length ==2 && pos){
           setSelectedPoints([pos]);
         }
         else if (!state.selectedPoints.some(p => p[0] === pos[0] && p[1] === pos[1])) {
-          if (pos)
-            setSelectedPoints([pos.data.latitude, pos.data.longitude]);
+          if (pos){
+            let mappedPoints =[];
+            mappedPoints.push([pos.data.latitude, pos.data.longitude]); 
+            mappedPoints.push([mylocation.data.latitude, mylocation.data.longitude]); 
+           
+            setSelectedPoints(mappedPoints);
+        }
+          
         }
 
         
@@ -101,10 +114,10 @@ const MapPage =(props)=>{
     if (state.selectedPoints.length === 2) {
       line = state.selectedPoints;
       midPoint = [
-        (line[0].latitude + line[1].latitude) / 2,
-        (line[0].longitude + line[1].longitue) / 2,
+        (line[0][0]+ line[1][0]) / 2,
+        (line[0][1] + line[1][1]) / 2,
       ];
-      distance = getDistanceInKm(line[0].latitude, line[0].longitude, line[1].latitude, line[1].longitude).toFixed(2);
+      distance = getDistanceInKm(line[0][0], line[0][1], line[1][0], line[1][1]).toFixed(2);
     }
     
 
@@ -113,7 +126,8 @@ const MapPage =(props)=>{
 
                mylocation? mylocation.data.latitude:0 , 
                mylocation? mylocation.data.longitude:0,
-               mylocation? mylocation.username : "" 
+               mylocation? mylocation.username : "", 
+               
               ];
    
               
@@ -131,16 +145,17 @@ const MapPage =(props)=>{
              />
          <Marker position={defaultProps}>
           <Popup >
-            <div className="popup-content">
-               Name : {defaultProps[2]} <br/>
-               Latitude: {defaultProps[0].toFixed(5)} <br/>
-               Longitude: {defaultProps[1].toFixed(5)}
+            <div className="popup-content map_page_card_container">
+  
+                  Name : {defaultProps[2]} <br/>
+                  Latitude: {defaultProps[0].toFixed(5)} <br/>
+                   Longitude: {defaultProps[1].toFixed(5)}
+               
             </div>
              
           </Popup>
         </Marker>
-        {console.log (otherUsers)}
-        {Array.isArray(otherUsers) && otherUsers.map((user, index) => (
+        {Array.isArray(otherPositions) && otherPositions.map((user, index) => (
           user?.data?.latitude && user?.data?.longitude ? (
             <Marker
               key={user.id || `user-${index}`}
@@ -149,17 +164,20 @@ const MapPage =(props)=>{
               
             >
               <Popup>
-                <div className="popup-content"
+                <div className="popup-content map_page_card_container"
                    style={{ cursor: "pointer", color: "blue" }}
                    
                    data-id={user.id}
                    data-name = {user.username}
                    > 
-                 
-                     <p
-                     className="map_page_card_label" style ={{fontSize:16}}>Name : {user.username} <br/> </p>
+          
+            
+                     <p className="map_page_card_label" style ={{fontSize:16}}>Name : {user.username} <br/> </p>
                     Latitude: {user.data.latitude.toFixed(5)} <br />
                     Longitude: {user.data.longitude.toFixed(5)}
+                    <ActionButton socketId= {user.id}   />
+                   
+                   
                 </div>
                
               </Popup>
@@ -175,8 +193,9 @@ const MapPage =(props)=>{
             <FitToLine  points={line} />
           </>
         )}
-      </MapContainer>
-        </div>
+           </MapContainer>
+        <Messenger />
+      </div>
     )
 }
 

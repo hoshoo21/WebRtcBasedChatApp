@@ -6,12 +6,13 @@ import {BrowserRouter as Router,
 from 'react-router-dom';
 import {Provider as MapProvider} from '../src/context/MapSliceContext';
 import {Provider as AuthProvider} from '../src/context/AuthContext';
+import {Provider as MsgProvider} from '../src/context/NessageContext';
 import LoginPage from './pages/LoginPage/LoginPage';
 import MapPage from './pages/MapPage/MapPage';
 function App() {
 
   return (
-
+    <MsgProvider>
       <MapProvider>
         <AuthProvider>
           <Router>
@@ -23,6 +24,7 @@ function App() {
         </AuthProvider>
         
       </MapProvider>
+      </MsgProvider>
       
     
   )
